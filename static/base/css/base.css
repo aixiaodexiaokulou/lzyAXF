@@ -38,7 +38,7 @@ header {
 	padding: 2.75rem 0;
 }
 #content {
-	/*width: 100%;*/
+	width: 100%;
 	/*width: 340px;*/
 	height: 100%;
 	overflow-x: hidden;

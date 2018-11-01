@@ -4,4 +4,7 @@ $(function () {
     // 480屏幕下: 1rem =
     // rem 相对于body 字体大小
     document.documentElement.style.fontSize = innerWidth / 320 * 16 + 'px'
+
+    // 挤出滚动条u
+    $('#content').width(innerWidth+20)
 })

@@ -15,3 +15,13 @@ class Base(models.Model):
 class Wheel(Base):
     class Meta:
         db_table = 'axf_wheel'
+
+# nav导航
+class Nav(Base):
+    class Meta:
+        db_table = 'axf_nav'
+
+# 每日必购
+class Mustbuy(Base):
+    class Meta:
+        db_table = 'axf_mustbuy'
