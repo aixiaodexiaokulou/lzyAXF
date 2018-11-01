@@ -10,8 +10,8 @@ def market(request): # 闪购超市
 
 
 def cart(request): # 购物车
-    return None
+    return render(request, 'cart/cart.html')
 
 
 def mine(request): # 我的
-    return None
+    return render(request, 'mine/mine.html')

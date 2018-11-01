@@ -1,10 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}
+    爱鲜蜂 | 购物车
+{% endblock %}
+{% block extcss %}
+    <link rel="stylesheet" href="{% static 'cart/css/cart.css' %}">
+{% endblock %}
+{% block content %}
+    购物车内容
+{% endblock %}
