@@ -1,7 +1,12 @@
-from django.shortcuts import render
+import os
+import uuid
+
+from django.http import HttpResponse
+from django.shortcuts import render, redirect
 
 # Create your views here.
-from axf.models import Wheel, Nav, Mustbuy, Shop, MainShow, Foodtypes, Goods
+from axf.models import Wheel, Nav, Mustbuy, Shop, MainShow, Foodtypes, Goods, User
+from python1809lzyAXF import settings
 
 
 def home(request):  # 首页
@@ -95,4 +100,46 @@ def cart(request):
 
 # 我的
 def mine(request):
-    return render(request, 'mine/mine.html')
+    # 获取用户信息
+    token = request.session.get('token')
+    responseDate = {}
+    if token:
+        user = User.objects.get(token=token)
+        responseDate['name'] = user.name
+        responseDate['rank'] = user.rank
+        responseDate['img'] = '/static/uploads/' + user.img
+    else:
+        responseDate['name'] = '未登录'
+        responseDate['rank'] = '暂无等级'
+        responseDate['img'] = '/static/uploads/axf.png'
+
+
+    return render(request, 'mine/mine.html',context=responseDate)
+
+# 注册
+def registe(request):
+    if request.method == 'GET':
+        return render(request, 'mine/registe.html')
+    elif request.method == 'POST':
+        user = User()
+        user.account = request.POST.get('account')
+        user.password = request.POST.get('password')
+        user.name = request.POST.get('name')
+        user.phone = request.POST.get('phone')
+        user.addr = request.POST.get('addr')
+        # user.img = 'axf.png'
+        # 头像
+        imgName = user.account + '.png'
+        imagePath = os.path.join(settings.MEDIA_ROOT, imgName)
+        file = request.FILES.get('icon')
+        with open(imagePath, 'wb') as fp:
+            for data in file.chunks():
+                fp.write(data)
+        user.img = imgName
+
+        user.token = str(uuid.uuid5(uuid.uuid4(), 'register'))
+        user.save()
+        # 状态保持
+        request.session['token'] = user.token
+        # 重定向
+        return redirect('axf:mine')

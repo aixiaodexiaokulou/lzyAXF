@@ -8,5 +8,6 @@ urlpatterns = [
     url(r'^market/(\d+)/(\d+)/(\d+)/$', views.market, name='market'),  # 闪购超市
     url(r'^cart/$', views.cart, name='cart'),  # 闪购超市
     url(r'^mine/$', views.mine, name='mine'),  # 闪购超市
+    url(r'^registe/$', views.registe, name='registe'),  # 注册
 
 ]
