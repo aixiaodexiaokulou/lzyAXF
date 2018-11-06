@@ -1,7 +1,7 @@
 import os
 import uuid
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
 # Create your views here.
@@ -143,3 +143,20 @@ def registe(request):
         request.session['token'] = user.token
         # 重定向
         return redirect('axf:mine')
+
+
+def checkaccount(request):
+    account = request.GET.get('account')
+    # print(account)
+    responseDate = {
+        'msg': '账号可用',
+        # 1表示可用 -1位不可用
+        'status': 1,
+    }
+    try:
+        user = User.objects.get(account=account)
+        responseDate['msg'] = '账号已被占用'
+        responseDate['status'] = -1
+        return JsonResponse(responseDate)
+    except:
+        return JsonResponse(responseDate)

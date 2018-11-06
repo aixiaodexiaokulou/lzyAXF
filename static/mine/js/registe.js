@@ -5,15 +5,32 @@ $(function () {
     $('#account input').blur(function () {
         // 正则表达式
         var reg = /^\w+$/
-        if (reg.test($(this).val())){  // 符合
-            $('#account i').html('')
-            $('#account').removeClass('has-error')
-            $('#account span').removeClass('glyphicon-remove')
+        if (reg.test($(this).val())) {  // 符合
 
 
-            $('#account').addClass('has-success')
-            $('#account span').addClass('glyphicon-ok')
-        }else {  // 不符合
+            // 发起ajax请求验证账号是否可用
+            $.get('/checkaccount/', {'account': $(this).val()}, function (response) {
+                console.log(response)
+                if (response.status == 1) {  //账号可用
+                    $('#account i').html('')
+                    $('#account').removeClass('has-error')
+                    $('#account span').removeClass('glyphicon-remove')
+
+
+                    $('#account').addClass('has-success')
+                    $('#account span').addClass('glyphicon-ok')
+                } else {              // 账号不可用
+                    $('#account i').html(response.msg)
+                    $('#account').removeClass('has-success')
+                    $('#account span').removeClass('glyphicon-ok')
+
+                    $('#account').addClass('has-error')
+                    $('#account span').addClass('glyphicon-remove')
+                }
+
+            })
+
+        } else {  // 不符合
             $('#account i').html('账号由数字字母下划线注册')
             $('#account').removeClass('has-success')
             $('#account span').removeClass('glyphicon-ok')
@@ -27,7 +44,7 @@ $(function () {
     $('#password input').blur(function () {
         // 正则表达式
         var reg = /^\d{6,12}$/
-        if (reg.test($(this).val())){  // 符合
+        if (reg.test($(this).val())) {  // 符合
             $('#password i').html('')
             $('#password').removeClass('has-error')
             $('#password span').removeClass('glyphicon-remove')
@@ -35,7 +52,7 @@ $(function () {
 
             $('#password').addClass('has-success')
             $('#password span').addClass('glyphicon-ok')
-        }else {  // 不符合
+        } else {  // 不符合
             $('#password i').html('6-12位数字')
             $('#password').removeClass('has-success')
             $('#password span').removeClass('glyphicon-ok')
@@ -49,7 +66,7 @@ $(function () {
     $('#passwd input').blur(function () {
         // 正则表达式
         var reg = /^\d{6,12}$/
-        if ($(this).val() == $('#password input').val()){  // 符合
+        if ($(this).val() == $('#password input').val()) {  // 符合
             $('#passwd i').html('')
             $('#passwd').removeClass('has-error')
             $('#passwd span').removeClass('glyphicon-remove')
@@ -57,7 +74,7 @@ $(function () {
 
             $('#passwd').addClass('has-success')
             $('#passwd span').addClass('glyphicon-ok')
-        }else {  // 不符合
+        } else {  // 不符合
             $('#passwd i').html('两次密码输入不一致')
             $('#passwd').removeClass('has-success')
             $('#passwd span').removeClass('glyphicon-ok')
@@ -70,7 +87,7 @@ $(function () {
     // 昵称
     $('#name input').blur(function () {
         // 正则表达式
-        if($(this).val() != ''){  // 符合
+        if ($(this).val() != '') {  // 符合
             $('#name i').html('')
             $('#name').removeClass('has-error')
             $('#name span').removeClass('glyphicon-remove')
@@ -78,7 +95,7 @@ $(function () {
 
             $('#name').addClass('has-success')
             $('#name span').addClass('glyphicon-ok')
-        }else {  // 不符合
+        } else {  // 不符合
             $('#name i').html('昵称不能为空')
             $('#name').removeClass('has-success')
             $('#name span').removeClass('glyphicon-ok')
@@ -92,7 +109,7 @@ $(function () {
     $('#phone input').blur(function () {
         // 正则表达式
         var reg = /^1[34578]\d{9}$/
-        if (reg.test($(this).val())){  // 符合
+        if (reg.test($(this).val())) {  // 符合
             $('#phone i').html('')
             $('#phone').removeClass('has-error')
             $('#phone span').removeClass('glyphicon-remove')
@@ -100,7 +117,8 @@ $(function () {
 
             $('#phone').addClass('has-success')
             $('#phone span').addClass('glyphicon-ok')
-        }else {  // 不符合
+
+        } else {  // 不符合
             $('#phone i').html('请输入正确的手机号')
             $('#phone').removeClass('has-success')
             $('#phone span').removeClass('glyphicon-ok')
