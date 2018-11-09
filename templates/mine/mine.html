@@ -19,7 +19,7 @@
             </div>
             <div class="user-content">
                 <p>
-                    <a href="#">
+                    <a href="{% url 'axf:login' %}">
                         <span class="glyphicon glyphicon-user"></span>
                         {{ name }}
                     </a>
@@ -118,11 +118,13 @@
                 </ul>
             </section>
 
-            <section class="quit">
-                <a href="#">
+            {% if isLogin %}
+                <section class="quit">
+                <a href="/logout/">
                     退出
                 </a>
-            </section>
+                </section>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

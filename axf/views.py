@@ -1,3 +1,4 @@
+import hashlib
 import os
 import uuid
 
@@ -73,13 +74,12 @@ def market(request, categoryid, childid, sortid):
         }
         childtypelist.append(dir)
 
-
     # 排序
-    if sortid == '1':   # 销量
+    if sortid == '1':  # 销量
         goodsList = goodsList.order_by('productnum')
-    elif sortid == '2': # 价格↑
+    elif sortid == '2':  # 价格↑
         goodsList = goodsList.order_by('price')
-    elif sortid == '3': # 价格↓
+    elif sortid == '3':  # 价格↓
         goodsList = goodsList.order_by('-price')
 
     data = {
@@ -87,7 +87,7 @@ def market(request, categoryid, childid, sortid):
         'goodsList': goodsList,  # 商品信息
         'childtypelist': childtypelist,  # 子类
         'categoryid': categoryid,  # 分类ID
-        'childid':childid,         # 子类ID
+        'childid': childid,  # 子类ID
     }
 
     return render(request, 'market/market.html', context=data)
@@ -108,22 +108,29 @@ def mine(request):
         responseDate['name'] = user.name
         responseDate['rank'] = user.rank
         responseDate['img'] = '/static/uploads/' + user.img
+        responseDate['isLogin'] = 1
     else:
         responseDate['name'] = '未登录'
         responseDate['rank'] = '暂无等级'
-        responseDate['img'] = '/static/uploads/axf.png'
+        responseDate['img'] = '/static/uploads/lzy1.png'
 
+    return render(request, 'mine/mine.html', context=responseDate)
 
-    return render(request, 'mine/mine.html',context=responseDate)
 
 # 注册
+def genarate_password(param):
+    sha = hashlib.sha256()
+    sha.update(param.encode('utf-8'))
+    return sha.hexdigest()
+
+
 def registe(request):
     if request.method == 'GET':
         return render(request, 'mine/registe.html')
     elif request.method == 'POST':
         user = User()
         user.account = request.POST.get('account')
-        user.password = request.POST.get('password')
+        user.password = genarate_password(request.POST.get('password'))
         user.name = request.POST.get('name')
         user.phone = request.POST.get('phone')
         user.addr = request.POST.get('addr')
@@ -145,6 +152,7 @@ def registe(request):
         return redirect('axf:mine')
 
 
+# 验证账号
 def checkaccount(request):
     account = request.GET.get('account')
     # print(account)
@@ -160,3 +168,37 @@ def checkaccount(request):
         return JsonResponse(responseDate)
     except:
         return JsonResponse(responseDate)
+
+
+# 退出
+def logout(request):
+    request.session.flush()
+    return redirect('axf:mine')
+
+
+# 登录
+def login(request):
+    if request.method == 'GET':
+        return render(request, 'mine/login.html')
+    elif request.method == 'POST':
+        account = request.POST.get('account')
+        password = request.POST.get('password')
+
+        try:
+            user = User.objects.get(account=account)
+            if user.password == genarate_password(password):  # 登录成功
+
+                # 更新token
+                user.token = str(uuid.uuid5(uuid.uuid4(), 'login'))
+                user.save()
+                request.session['token'] = user.token
+                return redirect('axf:mine')
+            else:  # 登录失败
+                return render(request, 'mine/login.html', context={'passwdErr': '密码错误!'})
+        except:
+            return render(request, 'mine/login.html', context={'acountErr': '账号不存在!'})
+
+
+# 添加购物车操作
+def addcart(request):
+    return JsonResponse({'msg': '添加购物车成功'})

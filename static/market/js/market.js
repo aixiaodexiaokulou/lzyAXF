@@ -66,4 +66,20 @@ $(function () {
         $('.bounce-view.sort-view').hide()
         $('#sortBt i').removeClass('glyphicon glyphicon-menu-down').addClass('glyphicon glyphicon-menu-up')
     }
+
+
+
+    //购物车操作
+    $('.bt-wrapper .glyphicon-minus').hide()
+    $('.bt-wrapper .num').hide()
+
+    //加操作
+    $('.bt-wrapper .glyphicon-plus').click(function () {
+
+    })
+
+
+    //减操作
+
+
 })
