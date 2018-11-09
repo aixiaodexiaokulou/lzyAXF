@@ -6,7 +6,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
 # Create your views here.
-from axf.models import Wheel, Nav, Mustbuy, Shop, MainShow, Foodtypes, Goods, User
+from axf.models import Wheel, Nav, Mustbuy, Shop, MainShow, Foodtypes, Goods, User, Cart
 from python1809lzyAXF import settings
 
 
@@ -82,20 +82,22 @@ def market(request, categoryid, childid, sortid):
     elif sortid == '3':  # 价格↓
         goodsList = goodsList.order_by('-price')
 
+    token =  request.session.get('token')
+    carts = []
+    if token:   # 根据用户呢获取对应用户下的购物车数据
+        user = User.objects.get(token=token)
+        carts = Cart.objects.filter(user=user)
+
     data = {
         'foodtypes': foodtypes,  # 分类信息
         'goodsList': goodsList,  # 商品信息
         'childtypelist': childtypelist,  # 子类
         'categoryid': categoryid,  # 分类ID
         'childid': childid,  # 子类ID
+        'carts': carts,
     }
 
     return render(request, 'market/market.html', context=data)
-
-
-# 购物车
-def cart(request):
-    return render(request, 'cart/cart.html')
 
 
 # 我的
@@ -155,7 +157,7 @@ def registe(request):
 # 验证账号
 def checkaccount(request):
     account = request.GET.get('account')
-    # print(account)
+
     responseDate = {
         'msg': '账号可用',
         # 1表示可用 -1位不可用
@@ -201,4 +203,103 @@ def login(request):
 
 # 添加购物车操作
 def addcart(request):
-    return JsonResponse({'msg': '添加购物车成功'})
+
+    goodsid = request.GET.get('goodsid')
+    token = request.session.get('token')
+
+    responseData = {
+        'msg':'添加购物车成功',
+        'status':1,
+    }
+    if token:
+        user = User.objects.get(token=token)
+        goods = Goods.objects.get(pk=goodsid)
+
+        carts = Cart.objects.filter(user=user).filter(goods=goods)
+        if carts.exists():  # 商品已存在购物车 只修改商品个数
+            cart = carts.first()
+            cart.number = cart.number + 1
+            cart.save()
+            responseData['number'] = cart.number
+        else:               # 不存在购物车 就要新加一条数据
+            cart =Cart()
+            cart.user = user
+            cart.goods = goods
+            cart.number = 1
+            cart.save()
+
+            responseData['number'] = cart.number
+
+        return JsonResponse(responseData)
+    else:
+        # 发起AJAX请求不能重定向/跳转
+        # return redirect('axf:login')
+        responseData['msg'] = '未登录，请登录后操作'
+        responseData['status'] = -1
+        return JsonResponse(responseData)
+
+# 减掉商品
+def subcart(request):
+    token = request.session.get('token')
+    goodsid = request.GET.get('goodsid')
+
+
+    user = User.objects.get(token=token)
+    goods = Goods.objects.get(pk=goodsid)
+
+    # 删减
+    cart = Cart.objects.filter(user=user).filter(goods=goods).first()
+    cart.number = cart.number-1
+    cart.save()
+
+    responseData = {
+        'msg':'购物车删减物品成功',
+        'status':1,
+        'number':cart.number,
+    }
+
+
+    return JsonResponse(responseData)
+
+# 购物车
+def cart(request):
+    token = request.session.get('token')
+    if token:
+        user = User.objects.get(token=token)
+        carts = Cart.objects.filter(user=user).exclude(number=0)
+
+
+        return render(request, 'cart/cart.html',context={'carts':carts})
+    else:
+        return redirect('axf:login')
+# 改变购物车选中状态
+def changecartstatus(request):
+    cartid = request.GET.get('cartid')
+    cart = Cart.objects.get(pk=cartid)
+    cart.isselect = not cart.isselect
+    cart.save()
+
+    responseData = {
+        'msg': '选中状态改变',
+        'status': 1,
+        'isselect': cart.isselect
+    }
+
+    return JsonResponse(responseData)
+
+# 全选/取消全选
+def changecartselect(request):
+    isselect = request.GET.get('isselect')
+    if isselect == 'true':
+        isselect = True
+    else:
+        isselect = False
+
+    token = request.session.get('token')
+    user = User.objects.get(token=token)
+    carts = Cart.objects.filter(user=user)
+    for cart in carts:
+        cart.isselect = isselect
+        cart.save()
+
+    return JsonResponse({'msg':'反选操作成功', 'status':1})
